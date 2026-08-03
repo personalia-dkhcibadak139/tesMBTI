@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peta Kepribadian — Tes Tipe Kepribadian</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --ink:#182238;
+    --ink-2:#243252;
+    --paper:#F3ECDC;
+    --paper-2:#EAE0C9;
+    --gold:#C89A4A;
+    --gold-2:#E4BE7C;
+    --line: rgba(24,34,56,0.14);
+    --text-dim: rgba(24,34,56,0.62);
+    --good:#5C7A5A;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 800px at 15% -10%, #24345A 0%, var(--ink) 55%, #101828 100%);
+    color: var(--paper);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 16px;
+  }
+  .app{
+    width:100%;
+    max-width: 620px;
+  }
+  .brandline{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    justify-content:center;
+    color: var(--gold-2);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .brandline .rule{
+    height:1px; width:28px; background: var(--gold);
+    opacity:.6;
+  }
+  .card{
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: var(--radius);
+    padding: 40px 36px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(200,154,74,0.25);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 38px, rgba(24,34,56,0.035) 38px 39px),
+      repeating-linear-gradient(90deg, transparent 0 38px, rgba(24,34,56,0.035) 38px 39px);
+    pointer-events:none;
+  }
+  .card > *{ position:relative; }
+
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 32px;
+    line-height:1.15;
+    margin: 0 0 10px;
+  }
+  p.lede{
+    color: var(--text-dim);
+    font-size: 15px;
+    line-height:1.6;
+    margin: 0 0 26px;
+  }
+  .compass{
+    width: 92px; height: 92px;
+    margin: 0 auto 22px;
+    display:block;
+  }
+  .axis-legend{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin: 22px 0 28px;
+  }
+  .axis-chip{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .axis-chip b{ color: var(--ink); font-weight:600; }
+
+  button.primary{
+    appearance:none;
+    border:none;
+    background: linear-gradient(180deg, var(--gold-2), var(--gold));
+    color: #241804;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    cursor:pointer;
+    width:100%;
+    letter-spacing:0.01em;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 8px 18px -8px rgba(200,154,74,0.7);
+  }
+  button.primary:hover{ transform: translateY(-1px); box-shadow: 0 12px 22px -8px rgba(200,154,74,0.8); }
+  button.primary:active{ transform: translateY(0px); }
+  button.primary:focus-visible{ outline: 3px solid var(--ink); outline-offset:2px; }
+  button.primary:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+
+  button.ghost{
+    appearance:none;
+    background:none;
+    border:none;
+    color: var(--text-dim);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    padding:8px 4px;
+    text-decoration: underline;
+    text-underline-offset:3px;
+  }
+  button.ghost:focus-visible{ outline: 2px solid var(--ink); }
+
+  /* progress */
+  .progress-row{
+    display:flex; align-items:center; gap:12px;
+    margin-bottom: 26px;
+  }
+  .progress-track{
+    flex:1; height:4px; background: var(--line); border-radius:99px; overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; background: var(--gold); width:0%;
+    transition: width .35s ease;
+  }
+  .progress-label{
+    font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color: var(--text-dim); white-space:nowrap;
+  }
+
+  .q-axis-tag{
+    display:inline-block;
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color: var(--gold);
+    background: rgba(200,154,74,0.12);
+    border:1px solid rgba(200,154,74,0.4);
+    padding: 4px 10px;
+    border-radius:99px;
+    margin-bottom:16px;
+    font-weight:600;
+  }
+  .q-text{
+    font-family:'Fraunces', serif;
+    font-size: 22px;
+    line-height:1.4;
+    font-weight:500;
+    margin: 0 0 28px;
+    min-height: 84px;
+  }
+
+  .scale{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .scale button{
+    flex:1;
+    aspect-ratio:1;
+    border-radius:50%;
+    border: 1.5px solid var(--line);
+    background: var(--paper-2);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    color: transparent;
+    transition: all .15s ease;
+    position:relative;
+  }
+  .scale button .dot{
+    width: 10px; height:10px; border-radius:50%;
+    background: var(--ink); opacity:.18;
+  }
+  .scale button:hover{ border-color: var(--gold); }
+  .scale button.selected{
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .scale button.selected .dot{ background: var(--gold-2); opacity:1; }
+  .scale-labels{
+    display:flex; justify-content:space-between;
+    font-size:10.5px; color: var(--text-dim);
+    margin-bottom:30px;
+    letter-spacing:0.02em;
+  }
+  .scale-labels span:last-child{ text-align:right; }
+  .scale-labels span{ max-width:80px; }
+
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+
+  /* result */
+  .result-eyebrow{
+    font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--gold); font-weight:700; margin-bottom:8px;
+  }
+  .type-code{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 58px;
+    letter-spacing: 0.04em;
+    margin: 0 0 2px;
+    display:flex;
+    gap: 2px;
+  }
+  .type-code span{ display:inline-block; }
+  .type-name{
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    color: var(--ink-2);
+    margin: 0 0 18px;
+  }
+  .type-desc{
+    font-size:14.5px;
+    line-height:1.7;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+  .axis-bars{
+    display:flex; flex-direction:column; gap:16px;
+    margin-bottom: 30px;
+  }
+  .axis-bar-row{ }
+  .axis-bar-top{
+    display:flex; justify-content:space-between;
+    font-size:11.5px; font-weight:700;
+    margin-bottom:6px;
+    color: var(--ink);
+  }
+  .axis-bar-top .lo, .axis-bar-top .hi{ width:44%; }
+  .axis-bar-top .hi{ text-align:right; }
+  .axis-bar-track{
+    height:8px; border-radius:99px; background: var(--paper-2);
+    position:relative; overflow:hidden; border:1px solid var(--line);
+  }
+  .axis-bar-fill{
+    position:absolute; top:0; bottom:0; left:0;
+    background: linear-gradient(90deg, var(--gold-2), var(--gold));
+    border-radius:99px;
+  }
+  .axis-pct{
+    font-size:10.5px; color: var(--text-dim); margin-top:4px; display:flex; justify-content:space-between;
+  }
+
+  .hidden{ display:none !important; }
+
+  @media (max-width:480px){
+    .card{ padding: 30px 22px; }
+    h1.title{ font-size:26px; }
+    .type-code{ font-size:44px; }
+    .q-text{ font-size:19px; min-height:auto; }
+    .axis-legend{ grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brandline"><span class="rule"></span> PETA KEPRIBADIAN <span class="rule"></span></div>
+
+  <div class="card">
+
+    <!-- INTRO -->
+    <section id="screen-intro">
+      <svg class="compass" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" stroke="#C89A4A" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="50" cy="50" r="34" stroke="#C89A4A" stroke-width="1" opacity="0.35"/>
+        <path d="M50 8 L50 20 M50 80 L50 92 M8 50 L20 50 M80 50 L92 50" stroke="#182238" stroke-width="1.4" opacity="0.5"/>
+        <path d="M50 20 L58 50 L50 80 L42 50 Z" fill="#C89A4A"/>
+        <circle cx="50" cy="50" r="4" fill="#182238"/>
+      </svg>
+      <h1 class="title">Temukan Empat Huruf yang Memetakan Caramu Berpikir</h1>
+      <p class="lede">Tes ini memakai kerangka empat dimensi ala Myers–Briggs (MBTI) — 32 pernyataan singkat, sekitar 6–8 menit. Jawab sejujurnya berdasarkan kebiasaanmu sehari-hari, bukan versi ideal dirimu.</p>
+
+      <div class="axis-legend">
+        <div class="axis-chip"><b>E</b> vs <b>I</b> — arah energi</div>
+        <div class="axis-chip"><b>S</b> vs <b>N</b> — cara menyerap info</div>
+        <div class="axis-chip"><b>T</b> vs <b>F</b> — cara memutuskan</div>
+        <div class="axis-chip"><b>J</b> vs <b>P</b> — cara menjalani hidup</div>
+      </div>
+
+      <button class="primary" onclick="goToNameScreen()">Mulai Tes</button>
+      <p style="font-size:11.5px;color:var(--text-dim);text-align:center;margin-top:14px;">
+        Hasil bersifat reflektif, bukan diagnosis psikologis resmi.
+      </p>
+    </section>
+
+    <!-- NAME -->
+    <section id="screen-name" class="hidden">
+      <h1 class="title">Siapa Namamu?</h1>
+      <p class="lede">Nama ini dipakai untuk menyimpan hasil tesmu.</p>
+      <input type="text" id="nameInput" placeholder="Tulis nama lengkap"
+        style="width:100%;padding:14px 16px;border-radius:10px;border:1.5px solid var(--line);
+        font-family:'Inter',sans-serif;font-size:15px;margin-bottom:20px;background:var(--paper-2);color:var(--ink);">
+      <p id="nameError" style="color:#a0453a;font-size:12.5px;margin:-12px 0 16px;display:none;">Nama tidak boleh kosong.</p>
+      <button class="primary" onclick="startQuiz()">Lanjut ke Soal</button>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="screen-quiz" class="hidden">
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-label" id="progressLabel">1 / 32</div>
+      </div>
+
+      <div id="axisTag" class="q-axis-tag">ARAH ENERGI</div>
+      <p class="q-text" id="questionText">—</p>
+
+      <div class="scale" id="scaleRow"></div>
+      <div class="scale-labels">
+        <span>Sangat tidak setuju</span>
+        <span>Sangat setuju</span>
+      </div>
+
+      <div class="nav-row">
+        <button class="ghost" id="backBtn" onclick="goBack()">← Sebelumnya</button>
+        <button class="ghost" onclick="skipQuestion()">Lewati →</button>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="screen-result" class="hidden">
+      <div class="result-eyebrow">Tipe kepribadianmu</div>
+      <h2 class="type-code" id="typeCode"></h2>
+      <p class="type-name" id="typeName"></p>
+      <p class="type-desc" id="typeDesc"></p>
+
+      <div class="axis-bars" id="axisBars"></div>
+
+      <p id="saveStatus" style="font-size:12.5px;color:var(--text-dim);text-align:center;margin:-14px 0 20px;"></p>
+
+      <button class="primary" onclick="restartQuiz()">Ulangi Tes</button>
+    </section>
+
+  </div>
+</div>
+
+<script>
+const AXES = {
+  EI: { label: 'ARAH ENERGI', lo: 'I · Introvert', hi: 'E · Extrovert' },
+  SN: { label: 'CARA MENYERAP INFORMASI', lo: 'S · Sensing', hi: 'N · Intuition' },
+  TF: { label: 'CARA MEMUTUSKAN', lo: 'F · Feeling', hi: 'T · Thinking' },
+  JP: { label: 'CARA MENJALANI HIDUP', lo: 'P · Perceiving', hi: 'J · Judging' }
+};
+
+const QUESTIONS = [
+  // E (agree -> E)
+  {axis:'EI', pole:'E', text:'Saya merasa lebih bersemangat setelah menghabiskan waktu di tengah banyak orang, dibanding sendirian.'},
+  {axis:'EI', pole:'E', text:'Saya suka melontarkan ide sambil berbicara, bukan memikirkannya matang-matang dulu.'},
+  {axis:'EI', pole:'E', text:'Saya mudah akrab dengan orang baru di suatu acara atau pertemuan.'},
+  {axis:'EI', pole:'E', text:'Saya lebih suka mengerjakan sesuatu bersama tim daripada sendirian.'},
+  // I (agree -> I)
+  {axis:'EI', pole:'I', text:'Saya butuh waktu menyendiri untuk memulihkan energi setelah bersosialisasi lama.'},
+  {axis:'EI', pole:'I', text:'Saya lebih suka memikirkan sesuatu secara matang sebelum mengucapkannya.'},
+  {axis:'EI', pole:'I', text:'Saya lebih nyaman mengobrol dengan satu-dua orang dekat daripada di keramaian.'},
+  {axis:'EI', pole:'I', text:'Saya lebih produktif saat bekerja sendirian tanpa banyak gangguan.'},
+
+  // S (agree -> S)
+  {axis:'SN', pole:'S', text:'Saya lebih percaya pada fakta dan pengalaman nyata daripada firasat.'},
+  {axis:'SN', pole:'S', text:'Saya lebih suka instruksi yang jelas dan rinci, langkah demi langkah.'},
+  {axis:'SN', pole:'S', text:'Saya lebih memperhatikan detail konkret daripada gambaran besar.'},
+  {axis:'SN', pole:'S', text:'Saya lebih suka menyelesaikan masalah dengan cara yang sudah terbukti berhasil.'},
+  // N (agree -> N)
+  {axis:'SN', pole:'N', text:'Saya suka membayangkan berbagai kemungkinan dan pola tersembunyi di balik sesuatu.'},
+  {axis:'SN', pole:'N', text:'Saya lebih tertarik pada ide dan konsep abstrak daripada rincian teknis.'},
+  {axis:'SN', pole:'N', text:'Saya sering memikirkan skenario "bagaimana jika" tentang masa depan.'},
+  {axis:'SN', pole:'N', text:'Saya lebih suka mencoba cara baru daripada mengikuti metode lama.'},
+
+  // T (agree -> T)
+  {axis:'TF', pole:'T', text:'Saya mengambil keputusan berdasarkan logika dan analisis, bukan perasaan.'},
+  {axis:'TF', pole:'T', text:'Saya lebih mengutamakan keadilan dan konsistensi aturan daripada situasi personal seseorang.'},
+  {axis:'TF', pole:'T', text:'Saya cenderung memberi kritik langsung meski berisiko menyinggung perasaan orang.'},
+  {axis:'TF', pole:'T', text:'Saya lebih fokus mencari kebenaran daripada menjaga suasana tetap nyaman.'},
+  // F (agree -> F)
+  {axis:'TF', pole:'F', text:'Saya mempertimbangkan perasaan orang lain sebelum mengambil keputusan.'},
+  {axis:'TF', pole:'F', text:'Saya lebih suka menjaga keharmonisan kelompok daripada memenangkan perdebatan.'},
+  {axis:'TF', pole:'F', text:'Saya mudah berempati dengan apa yang sedang dirasakan orang lain.'},
+  {axis:'TF', pole:'F', text:'Saya cenderung memberi apresiasi dulu sebelum menyampaikan kritik.'},
+
+  // J (agree -> J)
+  {axis:'JP', pole:'J', text:'Saya suka membuat rencana matang sebelum memulai sesuatu.'},
+  {axis:'JP', pole:'J', text:'Saya merasa lebih tenang ketika semuanya sudah diputuskan dan terjadwal.'},
+  {axis:'JP', pole:'J', text:'Saya lebih suka menyelesaikan tugas jauh sebelum tenggat waktu.'},
+  {axis:'JP', pole:'J', text:'Saya menyukai lingkungan kerja yang terstruktur dan rapi.'},
+  // P (agree -> P)
+  {axis:'JP', pole:'P', text:'Saya lebih suka membiarkan opsi tetap terbuka daripada terikat pada satu rencana.'},
+  {axis:'JP', pole:'P', text:'Saya sering bekerja lebih baik justru saat mendekati tenggat waktu.'},
+  {axis:'JP', pole:'P', text:'Saya suka berimprovisasi dan beradaptasi di tempat daripada mengikuti jadwal ketat.'},
+  {axis:'JP', pole:'P', text:'Saya merasa jadwal yang terlalu kaku itu membatasi.'}
+];
+
+const TYPES = {
+  INTJ:{name:'Sang Arsitek', desc:'Perencana strategis yang mandiri, suka menyusun sistem jangka panjang dan tak mudah puas dengan cara lama jika ada cara yang lebih efisien.'},
+  INTP:{name:'Sang Logikawan', desc:'Pemikir analitis yang haus akan pemahaman mendalam, senang membongkar ide sampai ke akar logikanya sebelum menerimanya.'},
+  ENTJ:{name:'Sang Komandan', desc:'Pemimpin tegas yang berorientasi hasil, cepat melihat peluang dan mengorganisir orang serta sumber daya untuk mencapainya.'},
+  ENTP:{name:'Sang Pendebat', desc:'Pencetus ide yang gesit dan suka menantang asumsi, menikmati diskusi terbuka dan eksplorasi kemungkinan baru.'},
+  INFJ:{name:'Sang Advokat', desc:'Idealis yang tenang namun teguh, punya visi jangka panjang tentang bagaimana membantu orang lain berkembang.'},
+  INFP:{name:'Sang Mediator', desc:'Pribadi reflektif dengan nilai batin yang kuat, setia pada makna dan keaslian dalam setiap hal yang dikerjakan.'},
+  ENFJ:{name:'Sang Protagonis', desc:'Penggerak yang hangat dan persuasif, pandai membaca kebutuhan orang lain dan menyatukan mereka menuju tujuan bersama.'},
+  ENFP:{name:'Sang Kampiun', desc:'Jiwa bebas yang antusias dan penuh ide, mudah terhubung dengan orang baru dan melihat potensi di mana-mana.'},
+  ISTJ:{name:'Sang Logistikus', desc:'Pribadi yang tertib dan bisa diandalkan, menjunjung tinggi tanggung jawab dan konsistensi dalam segala hal.'},
+  ISFJ:{name:'Sang Pembela', desc:'Pribadi hangat dan teliti yang senang menjaga kestabilan dan kenyamanan orang-orang di sekitarnya.'},
+  ESTJ:{name:'Sang Eksekutif', desc:'Pengatur yang tegas dan praktis, ahli dalam menjalankan rencana secara efisien dan menjaga semuanya tetap pada jalurnya.'},
+  ESFJ:{name:'Sang Konsul', desc:'Pribadi sosial dan penuh perhatian yang senang menjaga keharmonisan kelompok serta memastikan semua orang terlibat.'},
+  ISTP:{name:'Sang Virtuoso', desc:'Pemecah masalah yang praktis dan tenang, senang memahami cara kerja sesuatu langsung lewat tangan sendiri.'},
+  ISFP:{name:'Sang Petualang', desc:'Pribadi lembut dan artistik yang menjalani hidup mengikuti nilai pribadinya, menghargai kebebasan berekspresi.'},
+  ESTP:{name:'Sang Pengusaha', desc:'Pribadi enerjik dan spontan yang tanggap terhadap situasi nyata, senang bertindak cepat dan mengambil risiko terukur.'},
+  ESFP:{name:'Sang Penghibur', desc:'Pribadi ceria dan spontan yang hidup di momen saat ini, senang membawa keceriaan pada orang-orang di sekitarnya.'}
+};
+
+// GANTI dengan URL Web App hasil Deploy dari Apps Script (Langkah 1-5 di atas)
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz7SujuM5sYtSNVyDx9dvc4fyeZL98cVMhSH66Ate2bv2nYC5BGK6JNbNzbFPP69vO/exec';
+
+let answers = new Array(QUESTIONS.length).fill(null);
+let current = 0;
+let respondentName = '';
+
+function goToNameScreen(){
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-name').classList.remove('hidden');
+}
+
+function startQuiz(){
+  const nameVal = document.getElementById('nameInput').value.trim();
+  if(!nameVal){
+    document.getElementById('nameError').style.display = 'block';
+    return;
+  }
+  respondentName = nameVal;
+  document.getElementById('screen-name').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('axisTag').textContent = AXES[q.axis].label;
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('progressLabel').textContent = (current+1) + ' / ' + QUESTIONS.length;
+  document.getElementById('progressFill').style.width = ((current)/QUESTIONS.length*100) + '%';
+  document.getElementById('backBtn').style.visibility = current === 0 ? 'hidden' : 'visible';
+
+  const row = document.getElementById('scaleRow');
+  row.innerHTML = '';
+  for(let i=1;i<=5;i++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Skor ' + i);
+    if(answers[current] === i) btn.classList.add('selected');
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    btn.appendChild(dot);
+    btn.onclick = () => selectAnswer(i);
+    row.appendChild(btn);
+  }
+}
+
+function selectAnswer(value){
+  answers[current] = value;
+  renderQuestion();
+  setTimeout(()=>{
+    if(current < QUESTIONS.length - 1){
+      current++;
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }, 180);
+}
+
+function skipQuestion(){
+  if(answers[current] === null) answers[current] = 3;
+  if(current < QUESTIONS.length - 1){
+    current++;
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+function goBack(){
+  if(current > 0){
+    current--;
+    renderQuestion();
+  }
+}
+
+function finishQuiz(){
+  const totals = { E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0 };
+  QUESTIONS.forEach((q, idx) => {
+    const val = answers[idx] === null ? 3 : answers[idx];
+    totals[q.pole] += val;
+  });
+
+  const code =
+    (totals.E >= totals.I ? 'E' : 'I') +
+    (totals.N >= totals.S ? 'N' : 'S') +
+    (totals.T >= totals.F ? 'T' : 'F') +
+    (totals.J >= totals.P ? 'J' : 'P');
+
+  showResult(code, totals);
+}
+
+function showResult(code, totals){
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+
+  const codeEl = document.getElementById('typeCode');
+  codeEl.innerHTML = '';
+  code.split('').forEach((ch,i) => {
+    const span = document.createElement('span');
+    span.textContent = ch;
+    span.style.opacity = 0;
+    span.style.transform = 'translateY(8px)';
+    span.style.transition = 'all .35s ease ' + (i*0.09) + 's';
+    codeEl.appendChild(span);
+  });
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      [...codeEl.children].forEach(s => { s.style.opacity = 1; s.style.transform='translateY(0)'; });
+    });
+  });
+
+  const info = TYPES[code];
+  document.getElementById('typeName').textContent = info.name;
+  document.getElementById('typeDesc').textContent = info.desc;
+
+  sendToSheet(code, totals);
+
+  const pairs = [
+    ['EI','E','I'], ['SN','N','S'], ['TF','T','F'], ['JP','J','P']
+  ];
+  const barsEl = document.getElementById('axisBars');
+  barsEl.innerHTML = '';
+  pairs.forEach(([axisKey, hiPole, loPole]) => {
+    const hiVal = totals[hiPole], loVal = totals[loPole];
+    const pct = Math.round((hiVal / (hiVal+loVal)) * 100);
+    const ax = AXES[axisKey];
+
+    const row = document.createElement('div');
+    row.className = 'axis-bar-row';
+    row.innerHTML = `
+      <div class="axis-bar-top"><span class="lo">${ax.lo}</span><span class="hi">${ax.hi}</span></div>
+      <div class="axis-bar-track"><div class="axis-bar-fill" style="width:0%"></div></div>
+      <div class="axis-pct"><span>${100-pct}%</span><span>${pct}%</span></div>
+    `;
+    barsEl.appendChild(row);
+    const fill = row.querySelector('.axis-bar-fill');
+    setTimeout(()=>{ fill.style.transition = 'width .6s ease'; fill.style.width = pct + '%'; }, 50);
+  });
+}
+
+function sendToSheet(code, totals){
+  const statusEl = document.getElementById('saveStatus');
+  statusEl.textContent = 'Menyimpan hasil...';
+
+  const payload = {
+    nama: respondentName,
+    code: code,
+    totals: totals,
+    answers: answers.map(a => a === null ? 3 : a)
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors', // Apps Script tidak mengizinkan baca respons lintas origin, ini normal
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    statusEl.textContent = '✓ Hasil tersimpan atas nama ' + respondentName;
+  }).catch(() => {
+    statusEl.textContent = 'Gagal menyimpan hasil. Periksa koneksi internet.';
+  });
+}
+
+function restartQuiz(){
+  answers = new Array(QUESTIONS.length).fill(null);
+  current = 0;
+  respondentName = '';
+  document.getElementById('nameInput').value = '';
+  document.getElementById('nameError').style.display = 'none';
+  document.getElementById('saveStatus').textContent = '';
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-intro').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
