@@ -271,6 +271,42 @@
   .axis-pct{
     font-size:10.5px; color: var(--text-dim); margin-top:4px; display:flex; justify-content:space-between;
   }
+  .axis-narrative{
+    font-size:12px; color: var(--ink-2); margin-top:6px; line-height:1.5;
+  }
+
+  .analysis-block{
+    margin-bottom: 26px;
+  }
+  .analysis-heading{
+    font-family:'Fraunces', serif;
+    font-size: 15px;
+    font-weight:600;
+    color: var(--ink);
+    margin: 0 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .analysis-heading .swatch{
+    width:8px; height:8px; border-radius:2px; background: var(--gold);
+    display:inline-block; transform: rotate(45deg);
+  }
+  .analysis-list{
+    margin:0; padding:0; list-style:none;
+  }
+  .analysis-list li{
+    font-size:13.5px; line-height:1.6; color: var(--text-dim);
+    padding-left:18px; position:relative; margin-bottom:8px;
+  }
+  .analysis-list li::before{
+    content:"—";
+    position:absolute; left:0; color: var(--gold);
+  }
+  .analysis-p{
+    font-size:13.5px; line-height:1.7; color: var(--text-dim); margin:0;
+  }
+  .divider{
+    height:1px; background: var(--line); margin: 24px 0;
+  }
 
   .hidden{ display:none !important; }
 
@@ -360,6 +396,9 @@
 
       <div class="axis-bars" id="axisBars"></div>
 
+      <div class="divider"></div>
+      <div id="analysisSection"></div>
+
       <p id="saveStatus" style="font-size:12.5px;color:var(--text-dim);text-align:center;margin:-14px 0 20px;"></p>
 
       <button class="primary" onclick="restartQuiz()">Ulangi Tes</button>
@@ -423,26 +462,102 @@ const QUESTIONS = [
 ];
 
 const TYPES = {
-  INTJ:{name:'Sang Arsitek', desc:'Perencana strategis yang mandiri, suka menyusun sistem jangka panjang dan tak mudah puas dengan cara lama jika ada cara yang lebih efisien.'},
-  INTP:{name:'Sang Logikawan', desc:'Pemikir analitis yang haus akan pemahaman mendalam, senang membongkar ide sampai ke akar logikanya sebelum menerimanya.'},
-  ENTJ:{name:'Sang Komandan', desc:'Pemimpin tegas yang berorientasi hasil, cepat melihat peluang dan mengorganisir orang serta sumber daya untuk mencapainya.'},
-  ENTP:{name:'Sang Pendebat', desc:'Pencetus ide yang gesit dan suka menantang asumsi, menikmati diskusi terbuka dan eksplorasi kemungkinan baru.'},
-  INFJ:{name:'Sang Advokat', desc:'Idealis yang tenang namun teguh, punya visi jangka panjang tentang bagaimana membantu orang lain berkembang.'},
-  INFP:{name:'Sang Mediator', desc:'Pribadi reflektif dengan nilai batin yang kuat, setia pada makna dan keaslian dalam setiap hal yang dikerjakan.'},
-  ENFJ:{name:'Sang Protagonis', desc:'Penggerak yang hangat dan persuasif, pandai membaca kebutuhan orang lain dan menyatukan mereka menuju tujuan bersama.'},
-  ENFP:{name:'Sang Kampiun', desc:'Jiwa bebas yang antusias dan penuh ide, mudah terhubung dengan orang baru dan melihat potensi di mana-mana.'},
-  ISTJ:{name:'Sang Logistikus', desc:'Pribadi yang tertib dan bisa diandalkan, menjunjung tinggi tanggung jawab dan konsistensi dalam segala hal.'},
-  ISFJ:{name:'Sang Pembela', desc:'Pribadi hangat dan teliti yang senang menjaga kestabilan dan kenyamanan orang-orang di sekitarnya.'},
-  ESTJ:{name:'Sang Eksekutif', desc:'Pengatur yang tegas dan praktis, ahli dalam menjalankan rencana secara efisien dan menjaga semuanya tetap pada jalurnya.'},
-  ESFJ:{name:'Sang Konsul', desc:'Pribadi sosial dan penuh perhatian yang senang menjaga keharmonisan kelompok serta memastikan semua orang terlibat.'},
-  ISTP:{name:'Sang Virtuoso', desc:'Pemecah masalah yang praktis dan tenang, senang memahami cara kerja sesuatu langsung lewat tangan sendiri.'},
-  ISFP:{name:'Sang Petualang', desc:'Pribadi lembut dan artistik yang menjalani hidup mengikuti nilai pribadinya, menghargai kebebasan berekspresi.'},
-  ESTP:{name:'Sang Pengusaha', desc:'Pribadi enerjik dan spontan yang tanggap terhadap situasi nyata, senang bertindak cepat dan mengambil risiko terukur.'},
-  ESFP:{name:'Sang Penghibur', desc:'Pribadi ceria dan spontan yang hidup di momen saat ini, senang membawa keceriaan pada orang-orang di sekitarnya.'}
+  INTJ:{name:'Sang Arsitek', desc:'Perencana strategis yang mandiri, suka menyusun sistem jangka panjang dan tak mudah puas dengan cara lama jika ada cara yang lebih efisien.',
+    kekuatan:['Mampu melihat pola besar dan menyusun strategi jangka panjang.','Mandiri dan percaya diri mengambil keputusan sulit.','Terus mencari cara yang lebih efisien, tidak cepat puas dengan status quo.'],
+    berkembang:['Kadang terlihat terlalu kaku atau dingin bagi orang lain saat fokus pada logika.','Perlu belajar menyampaikan ide dengan lebih sabar ke orang yang berpikir berbeda.','Cenderung meremehkan pekerjaan rutin yang dianggap kurang efisien.'],
+    kerja:'Paling nyaman bekerja dengan otonomi tinggi, memegang proyek yang butuh visi jangka panjang dan pemikiran sistemik.'},
+  INTP:{name:'Sang Logikawan', desc:'Pemikir analitis yang haus akan pemahaman mendalam, senang membongkar ide sampai ke akar logikanya sebelum menerimanya.',
+    kekuatan:['Analitis dan objektif, jarang terburu-buru menyimpulkan sesuatu.','Kreatif dalam memecahkan masalah konseptual yang rumit.','Terbuka terhadap ide baru selama logikanya masuk akal.'],
+    berkembang:['Bisa terjebak terlalu lama menganalisis tanpa mengeksekusi.','Kurang nyaman dengan rutinitas administratif atau detail berulang.','Perlu berlatih menyampaikan pemikiran dengan cara yang lebih ringkas untuk orang lain.'],
+    kerja:'Cocok di peran yang memberi ruang eksplorasi ide dan pemecahan masalah, dengan sedikit birokrasi dan aturan kaku.'},
+  ENTJ:{name:'Sang Komandan', desc:'Pemimpin tegas yang berorientasi hasil, cepat melihat peluang dan mengorganisir orang serta sumber daya untuk mencapainya.',
+    kekuatan:['Tegas dan percaya diri dalam memimpin serta mengambil keputusan.','Pandai menyusun strategi dan mengorganisir sumber daya menuju target.','Berorientasi hasil, tidak mudah terdistraksi dari tujuan utama.'],
+    berkembang:['Bisa terkesan mendominasi atau kurang sabar dengan proses orang lain.','Perlu melatih kepekaan terhadap perasaan tim saat menekan target.','Rentan mengabaikan detail kecil demi mengejar gambaran besar.'],
+    kerja:'Berkembang pesat di posisi kepemimpinan yang menuntut pengambilan keputusan cepat dan pengelolaan tim menuju target jelas.'},
+  ENTP:{name:'Sang Pendebat', desc:'Pencetus ide yang gesit dan suka menantang asumsi, menikmati diskusi terbuka dan eksplorasi kemungkinan baru.',
+    kekuatan:['Cepat menangkap peluang dan menghasilkan ide-ide segar.','Piawai berargumen dan melihat berbagai sudut pandang sekaligus.','Adaptif terhadap perubahan dan tidak takut mencoba hal baru.'],
+    berkembang:['Mudah bosan dengan tugas rutin atau yang sudah pasti hasilnya.','Kadang lebih suka berdebat daripada menyepakati keputusan akhir.','Perlu melatih konsistensi menyelesaikan apa yang sudah dimulai.'],
+    kerja:'Cocok di lingkungan dinamis yang menghargai ide baru, brainstorming, dan pemecahan masalah non-konvensional.'},
+  INFJ:{name:'Sang Advokat', desc:'Idealis yang tenang namun teguh, punya visi jangka panjang tentang bagaimana membantu orang lain berkembang.',
+    kekuatan:['Punya visi dan nilai yang kuat, konsisten memperjuangkannya.','Peka terhadap kebutuhan orang lain meski tidak diucapkan.','Mampu memotivasi orang lain lewat empati dan ketulusan.'],
+    berkembang:['Cenderung memendam perasaan sendiri demi menjaga keharmonisan.','Mudah kelelahan secara emosional jika terlalu banyak memikirkan orang lain.','Perlu belajar menerima bahwa tidak semua hal bisa sempurna sesuai idealismenya.'],
+    kerja:'Berkembang di peran yang punya makna dan dampak jangka panjang bagi orang lain, dengan cukup ruang untuk bekerja secara mendalam dan tenang.'},
+  INFP:{name:'Sang Mediator', desc:'Pribadi reflektif dengan nilai batin yang kuat, setia pada makna dan keaslian dalam setiap hal yang dikerjakan.',
+    kekuatan:['Setia pada nilai pribadi dan integritas dalam bertindak.','Kreatif dan punya kepekaan yang dalam terhadap makna di balik sesuatu.','Empatik dan mudah memahami perasaan orang lain.'],
+    berkembang:['Kadang terlalu idealis sehingga sulit menerima kompromi praktis.','Cenderung menghindari konflik langsung meski itu perlu dibicarakan.','Perlu melatih disiplin menyelesaikan tugas yang terasa kurang bermakna baginya.'],
+    kerja:'Nyaman di pekerjaan yang selaras dengan nilai pribadi, memberi ruang berekspresi, dan tidak terlalu terikat rutinitas kaku.'},
+  ENFJ:{name:'Sang Protagonis', desc:'Penggerak yang hangat dan persuasif, pandai membaca kebutuhan orang lain dan menyatukan mereka menuju tujuan bersama.',
+    kekuatan:['Persuasif dan hangat, mudah menggerakkan orang lain.','Peka membaca dinamika dan kebutuhan kelompok.','Bertanggung jawab dan berkomitmen pada orang-orang yang dipimpinnya.'],
+    berkembang:['Cenderung mengorbankan kebutuhan sendiri demi menyenangkan orang lain.','Bisa terlalu memaksakan visinya dianggap benar oleh semua orang.','Perlu belajar menerima kritik tanpa menganggapnya serangan pribadi.'],
+    kerja:'Cocok di peran yang melibatkan orang banyak — mengajar, memimpin tim, atau membangun komunitas menuju tujuan bersama.'},
+  ENFP:{name:'Sang Kampiun', desc:'Jiwa bebas yang antusias dan penuh ide, mudah terhubung dengan orang baru dan melihat potensi di mana-mana.',
+    kekuatan:['Antusias dan mudah membangkitkan semangat orang di sekitarnya.','Kreatif, melihat banyak kemungkinan dan koneksi antar ide.','Mudah membangun hubungan hangat dengan orang baru.'],
+    berkembang:['Mudah teralihkan dari satu ide ke ide lain sebelum menyelesaikannya.','Kurang sabar dengan detail teknis dan pekerjaan repetitif.','Perlu melatih fokus dan komitmen jangka panjang pada satu rencana.'],
+    kerja:'Berkembang di lingkungan yang fleksibel dan penuh interaksi, terutama pekerjaan yang menggabungkan kreativitas dengan orang-orang.'},
+  ISTJ:{name:'Sang Logistikus', desc:'Pribadi yang tertib dan bisa diandalkan, menjunjung tinggi tanggung jawab dan konsistensi dalam segala hal.',
+    kekuatan:['Bisa diandalkan, konsisten menepati komitmen dan tenggat waktu.','Teliti dan terstruktur dalam bekerja.','Praktis, fokus pada solusi yang sudah terbukti berhasil.'],
+    berkembang:['Bisa kaku menghadapi perubahan rencana yang mendadak.','Kurang nyaman mengekspresikan emosi secara terbuka.','Perlu melatih keterbukaan terhadap cara-cara baru yang belum teruji.'],
+    kerja:'Cocok di peran yang butuh ketelitian, aturan jelas, dan tanggung jawab konsisten — administrasi, kepatuhan, atau operasional.'},
+  ISFJ:{name:'Sang Pembela', desc:'Pribadi hangat dan teliti yang senang menjaga kestabilan dan kenyamanan orang-orang di sekitarnya.',
+    kekuatan:['Teliti dan penuh perhatian pada detail kebutuhan orang lain.','Setia dan bisa diandalkan dalam jangka panjang.','Sabar menjaga stabilitas dan keharmonisan lingkungan sekitarnya.'],
+    berkembang:['Cenderung mengabaikan kebutuhan sendiri demi orang lain.','Sulit menolak permintaan meski sudah kewalahan.','Perlu melatih keberanian menyuarakan pendapat berbeda secara terbuka.'],
+    kerja:'Nyaman di peran pendukung yang butuh ketelitian dan kepedulian — layanan, administrasi personalia, atau perawatan.'},
+  ESTJ:{name:'Sang Eksekutif', desc:'Pengatur yang tegas dan praktis, ahli dalam menjalankan rencana secara efisien dan menjaga semuanya tetap pada jalurnya.',
+    kekuatan:['Terorganisir dan efisien dalam menjalankan rencana.','Tegas mengambil keputusan berdasarkan data dan fakta.','Bertanggung jawab penuh menjaga standar dan aturan tetap berjalan.'],
+    berkembang:['Bisa terkesan terlalu kaku terhadap aturan dan kurang fleksibel.','Cenderung kurang sabar dengan pendekatan yang tidak sistematis.','Perlu melatih kepekaan terhadap perasaan tim, bukan hanya hasil kerja.'],
+    kerja:'Berkembang di posisi manajerial atau operasional yang menuntut struktur, efisiensi, dan pengawasan langsung.'},
+  ESFJ:{name:'Sang Konsul', desc:'Pribadi sosial dan penuh perhatian yang senang menjaga keharmonisan kelompok serta memastikan semua orang terlibat.',
+    kekuatan:['Hangat dan penuh perhatian terhadap kebutuhan orang di sekitarnya.','Terorganisir dalam menjaga kelancaran kegiatan kelompok.','Setia dan bisa diandalkan sebagai penghubung antar orang.'],
+    berkembang:['Terlalu bergantung pada validasi dan pengakuan dari orang lain.','Kesulitan menghadapi konflik atau kritik secara langsung.','Perlu melatih ketegasan saat kebutuhan sendiri berbenturan dengan orang lain.'],
+    kerja:'Cocok di peran yang melibatkan koordinasi orang banyak, layanan pelanggan, atau pengelolaan acara dan komunitas.'},
+  ISTP:{name:'Sang Virtuoso', desc:'Pemecah masalah yang praktis dan tenang, senang memahami cara kerja sesuatu langsung lewat tangan sendiri.',
+    kekuatan:['Praktis dan tenang saat menghadapi masalah teknis mendadak.','Cepat memahami cara kerja sesuatu lewat eksperimen langsung.','Mandiri dan efisien, tidak butuh banyak arahan.'],
+    berkembang:['Kurang nyaman dengan komitmen jangka panjang atau rutinitas kaku.','Cenderung menghindari ekspresi emosi secara verbal.','Perlu melatih kesabaran pada proses yang lambat dan penuh birokrasi.'],
+    kerja:'Nyaman di peran teknis dan praktis yang butuh problem-solving langsung — teknik, perbaikan, atau pekerjaan lapangan.'},
+  ISFP:{name:'Sang Petualang', desc:'Pribadi lembut dan artistik yang menjalani hidup mengikuti nilai pribadinya, menghargai kebebasan berekspresi.',
+    kekuatan:['Sensitif secara estetika dan kreatif dalam berekspresi.','Setia pada nilai pribadi, tidak mudah terpengaruh tekanan sosial.','Fleksibel dan mudah beradaptasi dengan situasi baru.'],
+    berkembang:['Cenderung menghindari konflik dan menahan pendapat sendiri.','Sulit merencanakan jangka panjang karena lebih suka mengalir.','Perlu melatih keberanian menyampaikan kebutuhan diri secara langsung.'],
+    kerja:'Berkembang di lingkungan yang fleksibel dan memberi ruang ekspresi diri — desain, seni, atau pekerjaan langsung dengan orang/alam.'},
+  ESTP:{name:'Sang Pengusaha', desc:'Pribadi enerjik dan spontan yang tanggap terhadap situasi nyata, senang bertindak cepat dan mengambil risiko terukur.',
+    kekuatan:['Tanggap dan cepat bertindak dalam situasi yang butuh keputusan segera.','Pandai membaca situasi nyata dan peluang di lapangan.','Percaya diri mengambil risiko yang sudah diperhitungkan.'],
+    berkembang:['Bisa kurang sabar dengan perencanaan panjang dan teori.','Cenderung bertindak dulu tanpa memikirkan konsekuensi jangka panjang.','Perlu melatih konsistensi pada komitmen yang butuh waktu lama.'],
+    kerja:'Cocok di lingkungan dinamis dan cepat berubah yang menuntut aksi langsung — penjualan, operasional lapangan, atau situasi krisis.'},
+  ESFP:{name:'Sang Penghibur', desc:'Pribadi ceria dan spontan yang hidup di momen saat ini, senang membawa keceriaan pada orang-orang di sekitarnya.',
+    kekuatan:['Enerjik dan mudah mencairkan suasana di sekitarnya.','Spontan dan cepat beradaptasi dengan situasi baru.','Peka terhadap suasana hati orang lain dan pandai menghibur.'],
+    berkembang:['Kurang sabar dengan perencanaan detail dan tugas jangka panjang.','Mudah teralihkan perhatian dari tanggung jawab yang membosankan.','Perlu melatih kemampuan menerima kritik tanpa terlalu terbawa perasaan.'],
+    kerja:'Berkembang di peran yang melibatkan interaksi langsung dan energi tinggi — hospitality, event, atau layanan yang menghadapi banyak orang.'}
 };
 
+const AXIS_TRAITS = {
+  E:'energimu terisi lewat interaksi dan lingkungan luar',
+  I:'energimu terisi lewat waktu sendiri dan refleksi',
+  S:'kamu mengandalkan fakta, detail, dan pengalaman konkret',
+  N:'kamu tertarik pada pola, kemungkinan, dan gambaran besar',
+  T:'kamu memutuskan berdasarkan logika dan analisis objektif',
+  F:'kamu memutuskan dengan mempertimbangkan nilai dan perasaan orang lain',
+  J:'kamu menyukai keteraturan, rencana, dan kepastian',
+  P:'kamu menyukai fleksibilitas dan spontanitas'
+};
+
+function axisNarrative(pct, hiPole, loPole){
+  // pct = persentase condong ke hiPole
+  if(pct >= 65){
+    return 'Cenderung kuat ke arah ' + hiPole + ' (' + pct + '%) — ' + AXIS_TRAITS[hiPole] + '.';
+  } else if(pct >= 55){
+    return 'Sedikit condong ke arah ' + hiPole + ' (' + pct + '%), meski masih fleksibel ke sisi ' + loPole + '.';
+  } else if(pct > 45){
+    return 'Cukup seimbang antara ' + hiPole + ' dan ' + loPole + ' (' + pct + '% berbanding ' + (100-pct) + '%) — kamu bisa menyesuaikan diri di kedua sisi tergantung situasi.';
+  } else if(pct > 35){
+    const lo = 100-pct;
+    return 'Sedikit condong ke arah ' + loPole + ' (' + lo + '%), meski masih fleksibel ke sisi ' + hiPole + '.';
+  } else {
+    const lo = 100-pct;
+    return 'Cenderung kuat ke arah ' + loPole + ' (' + lo + '%) — ' + AXIS_TRAITS[loPole] + '.';
+  }
+}
+
 // GANTI dengan URL Web App hasil Deploy dari Apps Script (Langkah 1-5 di atas)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz7SujuM5sYtSNVyDx9dvc4fyeZL98cVMhSH66Ate2bv2nYC5BGK6JNbNzbFPP69vO/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_URL_WEB_APP_KAMU/exec';
 
 let answers = new Array(QUESTIONS.length).fill(null);
 let current = 0;
@@ -558,6 +673,22 @@ function showResult(code, totals){
   document.getElementById('typeName').textContent = info.name;
   document.getElementById('typeDesc').textContent = info.desc;
 
+  const analysisEl = document.getElementById('analysisSection');
+  analysisEl.innerHTML = `
+    <div class="analysis-block">
+      <p class="analysis-heading"><span class="swatch"></span>Kekuatan Utama</p>
+      <ul class="analysis-list">${info.kekuatan.map(k => '<li>'+k+'</li>').join('')}</ul>
+    </div>
+    <div class="analysis-block">
+      <p class="analysis-heading"><span class="swatch"></span>Area yang Perlu Diperhatikan</p>
+      <ul class="analysis-list">${info.berkembang.map(b => '<li>'+b+'</li>').join('')}</ul>
+    </div>
+    <div class="analysis-block">
+      <p class="analysis-heading"><span class="swatch"></span>Gaya Kerja</p>
+      <p class="analysis-p">${info.kerja}</p>
+    </div>
+  `;
+
   sendToSheet(code, totals);
 
   const pairs = [
@@ -576,6 +707,7 @@ function showResult(code, totals){
       <div class="axis-bar-top"><span class="lo">${ax.lo}</span><span class="hi">${ax.hi}</span></div>
       <div class="axis-bar-track"><div class="axis-bar-fill" style="width:0%"></div></div>
       <div class="axis-pct"><span>${100-pct}%</span><span>${pct}%</span></div>
+      <div class="axis-narrative">${axisNarrative(pct, hiPole, loPole)}</div>
     `;
     barsEl.appendChild(row);
     const fill = row.querySelector('.axis-bar-fill');
@@ -583,14 +715,32 @@ function showResult(code, totals){
   });
 }
 
+function buildAnalysisText(code){
+  const info = TYPES[code];
+  let text = info.desc + '\n\n';
+  text += 'KEKUATAN:\n';
+  info.kekuatan.forEach(k => { text += '- ' + k + '\n'; });
+  text += '\nAREA YANG PERLU DIPERHATIKAN:\n';
+  info.berkembang.forEach(b => { text += '- ' + b + '\n'; });
+  text += '\nGAYA KERJA:\n' + info.kerja;
+  return text;
+}
+
 function sendToSheet(code, totals){
   const statusEl = document.getElementById('saveStatus');
   statusEl.textContent = 'Menyimpan hasil...';
 
+  const pctE = Math.round((totals.E / (totals.E + totals.I)) * 100);
+  const pctN = Math.round((totals.N / (totals.N + totals.S)) * 100);
+  const pctT = Math.round((totals.T / (totals.T + totals.F)) * 100);
+  const pctJ = Math.round((totals.J / (totals.J + totals.P)) * 100);
+
   const payload = {
     nama: respondentName,
     code: code,
-    totals: totals,
+    namaTipe: TYPES[code].name,
+    analisa: buildAnalysisText(code),
+    pct: { E: pctE, N: pctN, T: pctT, J: pctJ },
     answers: answers.map(a => a === null ? 3 : a)
   };
 
