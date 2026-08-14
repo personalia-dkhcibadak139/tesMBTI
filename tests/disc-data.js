@@ -532,7 +532,15 @@ const SCALE_TABLE_CHANGE = [[-22, -8, -8, -8, -7.5], [-21, -7.5, -8, -8, -7.3], 
       placeholders: {
         PRIMARY: primaryLetterFromPattern(mainCode.pattern), PRIMARY_NAME: mainCode.name,
         PCT_D: changeProfile.barPct.D + '%', PCT_I: changeProfile.barPct.I + '%',
-        PCT_S: changeProfile.barPct.S + '%', PCT_C: changeProfile.barPct.C + '%'
+        PCT_S: changeProfile.barPct.S + '%', PCT_C: changeProfile.barPct.C + '%',
+        MOST_NAME: mostProfile.code.name,
+        MOST_TRAITS: mostProfile.code.traits.join('\n'),
+        LEAST_NAME: leastProfile.code.name,
+        LEAST_TRAITS: leastProfile.code.traits.join('\n'),
+        CHANGE_NAME: changeProfile.code.name,
+        CHANGE_TRAITS: changeProfile.code.traits.join('\n'),
+        DESKRIPSI: mainCode.desc,
+        JOB_MATCH: mainCode.career
       }
     };
   }
