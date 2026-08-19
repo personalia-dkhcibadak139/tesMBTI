@@ -13,7 +13,12 @@ const TEST_REGISTRY = {
   },
   DISC: {
     sheetName: 'Hasil_DISC',
-    templateId: 'ISI_DENGAN_ID_TEMPLATE_DOC_DISC',
+    templateId: '1DwF119yzgyQK4s6RPLPrhN1AKlMT7FXu',
+    folderId: '1bwkVKiGL91EUiedSj-41vuzB0nwrbQZD'
+  },
+  EPPS: {
+    sheetName: 'Hasil_EPPS',
+    templateId: 'ISI_DENGAN_ID_TEMPLATE_DOC_EPPS',
     folderId: '1bwkVKiGL91EUiedSj-41vuzB0nwrbQZD'
   }
   // Nanti nambah tes baru, tinggal tambah blok baru di sini, misal:
@@ -21,6 +26,22 @@ const TEST_REGISTRY = {
 };
 
 function doPost(e) {
+  try {
+    return doPostInner(e);
+  } catch (err) {
+    // Catat error ke sheet khusus "ErrorLog" supaya kelihatan walau execution log kosong
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var errSheet = ss.getSheetByName('ErrorLog') || ss.insertSheet('ErrorLog');
+      errSheet.appendRow([new Date(), err.message, err.stack, e.postData ? e.postData.contents : '(tidak ada postData)']);
+    } catch (e2) { /* abaikan kalau logging pun gagal */ }
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPostInner(e) {
   var data = JSON.parse(e.postData.contents);
   var cfg = TEST_REGISTRY[data.testType];
 
@@ -68,7 +89,17 @@ function generatePdf(cfg, placeholders, nama, testType) {
   var templateFile = DriveApp.getFileById(cfg.templateId);
   var folder = DriveApp.getFolderById(cfg.folderId);
 
-  var copy = templateFile.makeCopy(testType + ' - ' + nama, folder);
+  // Copy dulu TANPA folder tujuan (menghindari bug "Invalid argument: parent.mimeType"
+  // yang kadang muncul kalau folder tujuan langsung dikasih ke makeCopy), baru dipindah.
+  var copy = templateFile.makeCopy(testType + ' - ' + nama);
+  var copyFile = DriveApp.getFileById(copy.getId());
+  folder.addFile(copyFile);
+  var oldParents = copyFile.getParents();
+  while (oldParents.hasNext()) {
+    var p = oldParents.next();
+    if (p.getId() !== folder.getId()) p.removeFile(copyFile);
+  }
+
   var doc = DocumentApp.openById(copy.getId());
   var body = doc.getBody();
 
@@ -85,4 +116,33 @@ function generatePdf(cfg, placeholders, nama, testType) {
   DriveApp.getFileById(copy.getId()).setTrashed(true);
 
   return pdfFile.getUrl();
+}
+
+
+// ============================================
+// FUNGSI TES MANUAL — jalankan ini dari dropdown function
+// (pilih "testRunDisc" lalu klik Run) untuk memicu dialog izin
+// Drive/Docs dengan benar, dan untuk mengecek TEMPLATE_ID/FOLDER_ID DISC valid.
+// ============================================
+function testRunDisc() {
+  var cfg = TEST_REGISTRY.DISC;
+  Logger.log('Mengecek folder...');
+  var folder = DriveApp.getFolderById(cfg.folderId);
+  Logger.log('Folder OK: ' + folder.getName());
+
+  Logger.log('Mengecek template...');
+  var templateFile = DriveApp.getFileById(cfg.templateId);
+  Logger.log('Template OK: ' + templateFile.getName() + ' | MIME: ' + templateFile.getMimeType());
+
+  Logger.log('Mencoba generate PDF percobaan...');
+  var pdfUrl = generatePdf(cfg, {
+    NAMA: 'Tes Manual',
+    TANGGAL: '13 Agustus 2026',
+    PRIMARY: 'D',
+    PRIMARY_NAME: 'Contoh Tipe',
+    PCT_D: '50%', PCT_I: '20%', PCT_S: '15%', PCT_C: '15%',
+    ANALISA: 'Ini teks percobaan.'
+  }, 'Tes Manual', 'DISC');
+
+  Logger.log('BERHASIL! PDF: ' + pdfUrl);
 }

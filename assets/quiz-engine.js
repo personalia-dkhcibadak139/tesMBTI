@@ -17,10 +17,14 @@ const QuizEngine = (function () {
 
   function init(config, rootEl) {
     const isForcedChoice = config.answerType === 'forced-choice';
+    const isPairwise = config.answerType === 'pairwise';
     let answers = new Array(config.questions.length).fill(null);       // mode likert
     let forcedAnswers = new Array(config.questions.length).fill(null); // mode forced-choice: {most, least}
+    let pairwiseAnswers = new Array(config.questions.length).fill(null); // mode pairwise: 'A' | 'B'
     let current = 0;
     let respondentName = '';
+    let respondentGender = null;
+    let respondentStatus = null;
 
     rootEl.innerHTML = buildShell(config);
 
@@ -37,9 +41,28 @@ const QuizEngine = (function () {
 
     rootEl.querySelector('#startBtn').onclick = () => show('name');
 
+    if (config.demographics) {
+      rootEl.querySelectorAll('#genderOptions .demo-btn').forEach(btn => {
+        btn.onclick = () => {
+          respondentGender = btn.dataset.value;
+          rootEl.querySelectorAll('#genderOptions .demo-btn').forEach(b => b.classList.toggle('selected', b === btn));
+        };
+      });
+      rootEl.querySelectorAll('#statusOptions .demo-btn').forEach(btn => {
+        btn.onclick = () => {
+          respondentStatus = btn.dataset.value;
+          rootEl.querySelectorAll('#statusOptions .demo-btn').forEach(b => b.classList.toggle('selected', b === btn));
+        };
+      });
+    }
+
     rootEl.querySelector('#toQuizBtn').onclick = () => {
       const val = rootEl.querySelector('#nameInput').value.trim();
       if (!val) { rootEl.querySelector('#nameError').style.display = 'block'; return; }
+      if (config.demographics && (!respondentGender || !respondentStatus)) {
+        rootEl.querySelector('#demoError').style.display = 'block';
+        return;
+      }
       respondentName = val;
       show('quiz');
       renderQuestion();
@@ -51,6 +74,7 @@ const QuizEngine = (function () {
       rootEl.querySelector('#backBtn').style.visibility = current === 0 ? 'hidden' : 'visible';
 
       if (isForcedChoice) renderForcedChoiceQuestion();
+      else if (isPairwise) renderPairwiseQuestion();
       else renderLikertQuestion();
     }
 
@@ -79,6 +103,36 @@ const QuizEngine = (function () {
 
     function selectAnswer(value) {
       answers[current] = value;
+      renderQuestion();
+      setTimeout(() => {
+        if (current < config.questions.length - 1) { current++; renderQuestion(); }
+        else finish();
+      }, 180);
+    }
+
+    function renderPairwiseQuestion() {
+      const q = config.questions[current];
+      rootEl.querySelector('#axisTag').textContent = 'NO. ' + q.no + ' DARI ' + config.questions.length;
+      rootEl.querySelector('#questionText').textContent = 'Pilih pernyataan yang lebih menggambarkan dirimu.';
+      rootEl.querySelector('#scaleLabels').style.display = 'none';
+
+      const row = rootEl.querySelector('#scaleRow');
+      row.className = 'pw-list';
+      row.innerHTML = '';
+
+      const picked = pairwiseAnswers[current];
+      ['A', 'B'].forEach(letter => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pw-option' + (picked === letter ? ' selected' : '');
+        btn.innerHTML = '<span class="pw-letter">' + letter + '</span><span class="pw-text">' + q[letter] + '</span>';
+        btn.onclick = () => selectPairwise(letter);
+        row.appendChild(btn);
+      });
+    }
+
+    function selectPairwise(letter) {
+      pairwiseAnswers[current] = letter;
       renderQuestion();
       setTimeout(() => {
         if (current < config.questions.length - 1) { current++; renderQuestion(); }
@@ -143,6 +197,8 @@ const QuizEngine = (function () {
     rootEl.querySelector('#skipBtn').onclick = () => {
       if (isForcedChoice) {
         forcedAnswers[current] = { most: null, least: null };
+      } else if (isPairwise) {
+        // biarkan null, tidak dipaksa ke A/B
       } else if (answers[current] === null) {
         answers[current] = 3;
       }
@@ -169,6 +225,8 @@ const QuizEngine = (function () {
           }
         });
         result = config.computeResult({ most: mostCounts, least: leastCounts });
+      } else if (isPairwise) {
+        result = config.computeResult(pairwiseAnswers, { gender: respondentGender, status: respondentStatus });
       } else {
         const totals = {};
         config.questions.forEach((q, idx) => {
@@ -270,7 +328,14 @@ const QuizEngine = (function () {
       rootEl.querySelector('#restartBtn').onclick = () => {
         answers = new Array(config.questions.length).fill(null);
         forcedAnswers = new Array(config.questions.length).fill(null);
+        pairwiseAnswers = new Array(config.questions.length).fill(null);
         current = 0;
+        respondentGender = null;
+        respondentStatus = null;
+        if (config.demographics) {
+          rootEl.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('selected'));
+          rootEl.querySelector('#demoError').style.display = 'none';
+        }
         respondentName = '';
         rootEl.querySelector('#nameInput').value = '';
         rootEl.querySelector('#nameError').style.display = 'none';
@@ -305,7 +370,7 @@ const QuizEngine = (function () {
         testType: config.testType,
         nama: respondentName,
         placeholders: placeholders,
-        answers: isForcedChoice ? forcedAnswers : answers.map(a => a === null ? 3 : a)
+        answers: isForcedChoice ? forcedAnswers : (isPairwise ? pairwiseAnswers : answers.map(a => a === null ? 3 : a))
       };
 
       fetch(SCRIPT_URL, {
@@ -348,6 +413,23 @@ const QuizEngine = (function () {
           style="width:100%;padding:14px 16px;border-radius:10px;border:1.5px solid var(--line);
           font-family:'Inter',sans-serif;font-size:15px;margin-bottom:20px;background:var(--paper-2);color:var(--ink);">
         <p id="nameError" style="color:#a0453a;font-size:12.5px;margin:-12px 0 16px;display:none;">Nama tidak boleh kosong.</p>
+        ${config.demographics ? `
+        <div class="demo-group">
+          <p class="demo-label">Jenis Kelamin</p>
+          <div class="demo-options" id="genderOptions">
+            <button type="button" class="demo-btn" data-value="L">Laki-laki</button>
+            <button type="button" class="demo-btn" data-value="P">Perempuan</button>
+          </div>
+        </div>
+        <div class="demo-group">
+          <p class="demo-label">Status</p>
+          <div class="demo-options" id="statusOptions">
+            <button type="button" class="demo-btn" data-value="mahasiswa">Mahasiswa</button>
+            <button type="button" class="demo-btn" data-value="umum">Umum / Bekerja</button>
+          </div>
+        </div>
+        <p id="demoError" style="color:#a0453a;font-size:12.5px;margin:-8px 0 16px;display:none;">Pilih jenis kelamin dan status dulu ya.</p>
+        ` : ''}
         <button class="primary" id="toQuizBtn">Lanjut ke Soal</button>
       </section>
 
